@@ -1,0 +1,240 @@
+package pro.sky.hhw24;
+
+import net.bytebuddy.asm.Advice;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import pro.sky.hhw24.exceptions.ElementNotFoundException;
+import pro.sky.hhw24.exceptions.InvalidArgumentException;
+import pro.sky.hhw24.exceptions.StringListIndexOutOfBoundsException;
+
+import java.util.InvalidPropertiesFormatException;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class StringArrayListTest {
+
+    private StringArrayList out = new StringArrayList(5);
+
+    @BeforeEach
+
+    public void fillList() {
+        out.add("one");
+        out.add("two");
+        out.add("three");
+        out.add("four");
+        out.add("five");
+    }
+
+    @AfterEach
+    public void clearList() {
+        out.clear();
+    }
+
+    @Test
+    public void simpleAdditionPositiveTest() {
+        int size = out.size();
+        assertEquals("six", out.add("six"));
+        assertEquals(size + 1, out.size());
+    }
+
+    @Test
+    public void indexAdditionPositiveTest() {
+        int size = out.size();
+        int index = 1;
+        assertEquals("six", out.add(index, "six"));
+        assertEquals(index, out.indexOf("six"));
+        assertEquals(size + 1, out.size());
+
+    }
+
+    @Test
+    public void indexAdditionNegativeTest() {
+        assertThrows(StringListIndexOutOfBoundsException.class, () -> out.add(5, "six"));
+    }
+
+    @Test
+    public void settingPositiveTest() {
+        int size = out.size();
+        int index = 1;
+        assertEquals("six", out.set(index, "six"));
+        assertEquals(index, out.indexOf("six"));
+        assertEquals(size, out.size());
+    }
+
+    @Test
+    public void settingNegativeTest() {
+        assertThrows(StringListIndexOutOfBoundsException.class, () -> out.set(5, "six"));
+    }
+
+    @Test
+    public void removeByValueNegativeTest() {
+        assertThrows(ElementNotFoundException.class, () -> out.remove("six"));
+    }
+
+    @Test
+    public void removeByIndexPositiveTest() {
+        int size = out.size();
+        assertEquals("one", out.remove((0)));
+        assertEquals(size - 1, out.size());
+    }
+
+
+    @Test
+    public void removeByIndexNegativeTest() {
+        assertThrows(StringListIndexOutOfBoundsException.class, () -> out.remove(5));
+    }
+
+
+    public static Stream<Arguments> argumentsForContainsPositiveTest() {
+        return Stream.of(
+                Arguments.of("one"),
+                Arguments.of("three"),
+                Arguments.of("five")
+        );
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("argumentsForContainsPositiveTest")
+    public void containsPositiveTest(String str) {
+        assertTrue(out.contains(str));
+    }
+
+    public static Stream<Arguments> argumentsForContainsNegativeTest() {
+        return Stream.of(
+                Arguments.of("six"),
+                Arguments.of("seven"),
+                Arguments.of("eight"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("argumentsForContainsNegativeTest")
+    public void containsNegativeTest(String str) {
+        assertFalse(out.contains(str));
+    }
+
+    public static Stream<Arguments> argumentsForIndexOfPositiveTest() {
+        return Stream.of(
+                Arguments.of("one", 0),
+                Arguments.of("two", 1),
+                Arguments.of("three", 2),
+                Arguments.of("four", 3),
+                Arguments.of("five", 4)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("argumentsForIndexOfPositiveTest")
+    public void indexOfPositiveTest(String str, int index) {
+        assertEquals(index, out.indexOf(str));
+    }
+
+    public static Stream<Arguments> argumentsForIndexOfNegativeTest() {
+        return Stream.of(
+                Arguments.of("six", -1),
+                Arguments.of("Hello,World", -1)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("argumentsForIndexOfNegativeTest")
+    public void indexOfNegativeTest(String str, int index) {
+        assertEquals(index, out.indexOf(str));
+    }
+
+
+    public static Stream<Arguments> argumentsForLastIndexOfTest() {
+        return Stream.of(
+                Arguments.of("one", 5),
+                Arguments.of("two", 6),
+                Arguments.of("six", -1)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("argumentsForLastIndexOfTest")
+    public void lastIndexOfTest(String str, int index) {
+        out.add("one");
+        out.add("two");
+        assertEquals(index, out.lastIndexOf(str));
+    }
+
+
+    public static Stream<Arguments> argumentsForGetPositiveTest() {
+        return Stream.of(
+                Arguments.of("one", 0),
+                Arguments.of("two", 1),
+                Arguments.of("three", 2),
+                Arguments.of("four", 3),
+                Arguments.of("five", 4)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("argumentsForGetPositiveTest")
+    public void getPositiveTest(String str, int index) {
+        assertEquals(str, out.get(index));
+    }
+
+    @Test
+    public void getNegativeTest() {
+        assertThrows(StringListIndexOutOfBoundsException.class, () -> out.add(5, "six"));
+    }
+
+    @Test
+    public void equalsPositiveTest() {
+        StringArrayList test = new StringArrayList(5);
+        test.add("one");
+        test.add("two");
+        test.add("three");
+        test.add("four");
+        test.add("five");
+        assertTrue(out.equals(test));
+    }
+
+    @Test
+    public void equalNullNegativeTest() {
+        assertThrows(InvalidArgumentException.class, () -> out.equals(null));
+    }
+
+
+    public static Stream<Arguments> argumentForEqualsNegativeTest() {
+        return Stream.of(
+                Arguments.of(new StringArrayList("one", "two", "three")),
+                Arguments.of(new StringArrayList("one", "two", "three", "four", "six")),
+                Arguments.of(new StringArrayList("none", "two", "three", "four", "five")),
+                Arguments.of(new StringArrayList("one", "two", "drei", "four", "six"))
+        );
+
+    }
+
+    @ParameterizedTest
+    @MethodSource("argumentForEqualsNegativeTest")
+    public void equalsNegativeTest(StringArrayList arg) {
+        assertFalse(out.equals(arg));
+    }
+
+    @Test
+    public void isEmptyPositiveTest() {
+        StringArrayList test = new StringArrayList(5);
+        assertTrue(test.isEmpty());
+
+    }
+
+
+    @Test
+    public void isEmptyNegativeTest() {
+        assertFalse(out.isEmpty());
+    }
+    @Test
+    public void toArrayTest() {
+        String[] test = {"one", "two", "three", "four", "five"};
+        assertArrayEquals(test,out.toArray());
+    }
+
+}
