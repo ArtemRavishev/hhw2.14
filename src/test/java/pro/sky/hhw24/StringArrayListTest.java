@@ -72,6 +72,13 @@ public class StringArrayListTest {
     }
 
     @Test
+    public void removeByValuePositiveTest() {
+        int size = out.size();
+        assertEquals("one", out.remove("one"));
+        assertEquals(size - 1, out.size());
+    }
+
+    @Test
     public void removeByValueNegativeTest() {
         assertThrows(ElementNotFoundException.class, () -> out.remove("six"));
     }
@@ -79,7 +86,7 @@ public class StringArrayListTest {
     @Test
     public void removeByIndexPositiveTest() {
         int size = out.size();
-        assertEquals("one", out.remove((0)));
+        assertEquals("one", out.remove(0));
         assertEquals(size - 1, out.size());
     }
 
